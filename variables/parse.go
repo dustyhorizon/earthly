@@ -1,6 +1,7 @@
 package variables
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -72,13 +73,14 @@ func parseArg(arg string, pncvf ProcessNonConstantVariableFunc, current *Collect
 	}
 	if hasValue {
 		if reserved.IsBuiltIn(name) {
-			return "", "", errors.Errorf("value cannot be specified for built-in build arg %s", name)
+			fmt.Printf("value cannot be specified for built-in build arg %s and will be ignored\n", name)
+		} else {
+			v, err := parseArgValue(name, value, pncvf)
+			if err != nil {
+				return "", "", err
+			}
+			return name, v, nil
 		}
-		v, err := parseArgValue(name, value, pncvf)
-		if err != nil {
-			return "", "", err
-		}
-		return name, v, nil
 	}
 	v, ok := current.Get(name, WithActive())
 	if !ok {
